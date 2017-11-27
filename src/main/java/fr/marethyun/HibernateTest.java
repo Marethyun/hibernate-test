@@ -8,7 +8,6 @@ import org.hibernate.cfg.Configuration;
 
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.LogManager;
 
 public class HibernateTest {
 
@@ -19,17 +18,21 @@ public class HibernateTest {
         java.util.logging.Logger.getLogger("org.hibernate").setLevel(Level.OFF);
 
         Configuration config = new Configuration();
-
+        // Disable SQL logging
         config.setProperty("hibernate.show_sql", "false");
+        // Create table using mappers, if they don't exists
+        config.setProperty("hibernate.hbm2ddl.auto", "update");
 
+        // Configuring MySQL dialect
         config.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQL5Dialect");
         config.setProperty("hibernate.connection.driver_class", "com.mysql.cj.jdbc.Driver");
         config.setProperty("hibernate.connection.url", "jdbc:mysql://localhost/hibernate");
 
+        // Database account credentials
         config.setProperty("hibernate.connection.username", "root");
         config.setProperty("hibernate.connection.password", "root");
 
-        config.addResource("fr/marethyun/Book.hbm.xml");
+        config.addResource("mappers/Book.hbm.xml");
 
         try {
             factory = config.buildSessionFactory();
@@ -48,8 +51,9 @@ public class HibernateTest {
             for (Object mapped : books) {
                 Book book = (Book) mapped;
 
-                System.out.println(book.getName() + " -> " + book.getColor() + " printed");
+                System.out.println(book.getName() + " -> " + book.getColor());
             }
+
             tx.commit();
         } catch (HibernateException e){
             if (tx != null) tx.rollback();
